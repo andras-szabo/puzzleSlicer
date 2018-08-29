@@ -17,34 +17,33 @@ shader is used to draw the outline of matching connecting pieces.
 
 Changelog:
 0.6:
-	o saving game also when leaving the app via the back button
-	o code cleanup
-	o adjusting masks so that they fit better
-	o adding in-game help overlay linked to a "?" button
-	o build size improvements
+- saving game also when leaving the app via the back button
+- code cleanup
+- adjusting masks so that they fit better
+- adding in-game help overlay linked to a "?" button
+- build size improvements
 
 0.5:
-	o basic back button management
-	o much better use of device space		
-	o small ui tweaks (quit confirmation, version number on start menu)
+- basic back button management
+- much better use of device space
+- small ui tweaks (quit confirmation, version number on start menu)
 
 0.4:
-	o performance improvement for slicing
-	o performance improvement for normal gameplay; 
-	o some sound effects.
+- performance improvement for slicing
+- performance improvement for normal gameplay;
+- some sound effects.
 
 0.3:
-	o outline matching pieces
-	o "no edge" edges
-	o smoothen the rough edges
+- outline matching pieces
+- "no edge" edges
+- smoothen the rough edges
 
 0.2:
-	o fix bug with keeping the preferred aspect ratio of _previous_ img
-	o flash matching pieces
-	o changed background colour for lighter one
-
-	o auto save / load progress
-	o some cleanup
+- fix bug with keeping the preferred aspect ratio of _previous_ img
+- flash matching pieces
+- changed background colour for lighter one
+- auto save / load progress
+- some cleanup
 
 0.1:
-	o initial release
+- initial release
