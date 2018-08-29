@@ -16,6 +16,7 @@ UI shader, but without clipping (for performance reasons). And another simple fl
 shader is used to draw the outline of matching connecting pieces.
 
 Changelog:
+
 0.6:
 - saving game also when leaving the app via the back button
 - code cleanup
