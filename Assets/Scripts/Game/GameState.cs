@@ -26,11 +26,16 @@ public class GameState
 	public class SerializedGameState
 	{
 		public List<RootInfo> roots;
+		public int totalPieceCount;
+		public bool hasWon;
 	}
 
 	private Dictionary<IntVector2, RootInfo> _rootsByBoardPosition = new Dictionary<IntVector2, RootInfo>();
 	private Dictionary<IntVector2, IntVector2> _rootPositionsForEachPiece = new Dictionary<IntVector2, IntVector2>();
+	private int _totalPieceCount = -1;
 
+	public bool HasWon { get; private set; }
+	
 	public IEnumerable<RootInfo> Roots
 	{
 		get
@@ -49,7 +54,13 @@ public class GameState
 		return _rootPositionsForEachPiece.ContainsKey(new IntVector2(col, row));
 	}
 
-	public bool TryLoad()
+	public void Setup(int totalPieceCount)
+	{
+		_totalPieceCount = totalPieceCount;
+		HasWon = false;
+	}
+
+	public bool TryLoad(int expectedTotalPieceCount)
 	{
 		var path = System.IO.Path.Combine(Application.persistentDataPath, GAME_STATE_PATH);
 		var success = false;
@@ -57,7 +68,7 @@ public class GameState
 		{
 			var asJson = System.IO.File.ReadAllText(path);
 			var serialized = JsonUtility.FromJson<SerializedGameState>(asJson);
-			Deserialize(serialized);
+			Deserialize(serialized, expectedTotalPieceCount);
 			success = true;
 		}
 		catch (Exception e)
@@ -68,7 +79,7 @@ public class GameState
 		return success;
 	}
 
-	private void Deserialize(SerializedGameState sgs)
+	private void Deserialize(SerializedGameState sgs, int expectedTotalPieceCount)
 	{
 		_rootPositionsForEachPiece.Clear();
 		_rootsByBoardPosition.Clear();
@@ -80,6 +91,17 @@ public class GameState
 			{
 				_rootPositionsForEachPiece[piece] = root.boardPosition;
 			}
+		}
+
+		if (sgs.totalPieceCount == 0)						// Dealing with legacy gamestate without total piece count
+		{
+			_totalPieceCount = expectedTotalPieceCount;
+			CheckIfWon();
+		}
+		else
+		{
+			_totalPieceCount = sgs.totalPieceCount;
+			HasWon = sgs.hasWon;
 		}
 	}
 
@@ -100,7 +122,9 @@ public class GameState
 	{
 		var serializedState = new SerializedGameState 
 		{ 
-			roots = new List<RootInfo>(_rootsByBoardPosition.Values) 
+			roots = new List<RootInfo>(_rootsByBoardPosition.Values),
+			totalPieceCount = _totalPieceCount,
+			hasWon = HasWon
 		};
 
 		var asJson = JsonUtility.ToJson(serializedState);
@@ -120,6 +144,8 @@ public class GameState
 	{
 		_rootsByBoardPosition.Clear();
 		_rootPositionsForEachPiece.Clear();
+		HasWon = false;
+		_totalPieceCount = -1;
 	}
 
 	public void AddToPlayField(IntVector2 boardPosition, Vector3 worldPosition)
@@ -167,6 +193,13 @@ public class GameState
 
 		var rootPosition = _rootPositionsForEachPiece[piece.BoardPosition];
 		_rootsByBoardPosition[rootPosition].worldPosition = PuzzleService.Instance.GetWorldPositionForPiece(rootPosition);
+
+		CheckIfWon();
+	}
+
+	private void CheckIfWon()
+	{
+		HasWon = _rootsByBoardPosition.Count == 1 && _rootPositionsForEachPiece.Count == _totalPieceCount;
 	}
 
 	private void MergeRoots(IntVector2 a, IntVector2 b)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,7 +27,15 @@ public class PuzzleContainer : MonoBehaviour
 	public void ToggleBackground()
 	{
 		var currentState = helperBackgroundImg.gameObject.activeSelf;
-		helperBackgroundImg.gameObject.SetActive(!currentState);
+		if (!PuzzleService.Instance.IsGameWon)
+		{
+			helperBackgroundImg.gameObject.SetActive(!currentState);
+		}
+	}
+
+	public void SetBackgroundActive(bool state)
+	{
+		helperBackgroundImg.gameObject.SetActive(state);
 	}
 
 	public void Setup(SlicingInfo sliceInfo, Texture2D imageToSlice)
@@ -37,6 +46,7 @@ public class PuzzleContainer : MonoBehaviour
 		var imgHeight = imageToSlice.height;
 
 		helperBackgroundImg.texture = imageToSlice;
+		helperBackgroundImg.color = new Color(1f, 1f, 1f, 32f / 255f);
 		
 		var relativeWidth = 1f / (float)sliceInfo.columns;
 		var relativeHeight = 1f / (float)sliceInfo.rows;
@@ -74,6 +84,46 @@ public class PuzzleContainer : MonoBehaviour
 
 		PuzzleService.pieceWidth = anchorDifference.x;
 		PuzzleService.pieceHeight = anchorDifference.y;
+	}
+
+	private Coroutine _victoryRoutine;
+
+	public void ReplacePiecesWithBackgroundOnVictory(float moveDurationSeconds, float imgRevealDurationSeconds)
+	{
+		if (_victoryRoutine == null)
+		{
+			_victoryRoutine = StartCoroutine(VictoryRoutine(moveDurationSeconds, imgRevealDurationSeconds));
+		}
+	}
+
+	private IEnumerator VictoryRoutine(float moveDurationSeconds, float imgRevealDurationSeconds)
+	{
+		var eventSystem = UnityEngine.EventSystems.EventSystem.current;
+		eventSystem.enabled = false;
+
+		var pieces = GetComponentsInChildren<PiecePrefab>();
+
+		foreach (var piecePrefab in pieces)
+		{
+			piecePrefab.MoveToAnchoredPosition(moveDurationSeconds);
+		}
+
+		if (moveDurationSeconds > 0f) { yield return new WaitForSeconds(moveDurationSeconds); }
+
+		SetBackgroundActive(true);
+		helperBackgroundImg.color = Color.white;
+
+		var waitForPiece = new WaitForSeconds(imgRevealDurationSeconds / pieces.Length);
+
+		for (int i = 0; i < pieces.Length; ++i)
+		{
+			pieces[i].gameObject.SetActive(false);
+			if (imgRevealDurationSeconds > 0f) { yield return waitForPiece; }
+		}
+
+		_victoryRoutine = null;
+
+		eventSystem.enabled = true;
 	}
 
 	private void ScaleToFitSourceImage(int imgWidth, int imgHeight, Rect myrect)

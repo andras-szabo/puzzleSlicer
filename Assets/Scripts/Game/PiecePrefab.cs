@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -276,6 +277,34 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 	{
 		BackgroundTransform.localScale = new Vector3(UPSCALE_OF_SELECTED_PIECE, UPSCALE_OF_SELECTED_PIECE, 0f);
 		BackgroundTransform.SetParent(PuzzleService.Instance.pieceOutlineDisplay, true);
+	}
+
+	private Coroutine _moveToAnchorRoutine;
+
+	// TODO: Disable movement while moving to anchored pos
+	public void MoveToAnchoredPosition(float moveDurationSeconds)
+	{
+		if (_moveToAnchorRoutine == null)
+		{
+			_moveToAnchorRoutine = StartCoroutine(MoveToAnchoredPositionRoutine(moveDurationSeconds));
+		}
+	}
+
+	private IEnumerator MoveToAnchoredPositionRoutine(float moveDurationSeconds)
+	{
+		var elapsedTime = 0f;
+		var startPosition = CachedTransform.localPosition;
+
+		while (elapsedTime < moveDurationSeconds)
+		{
+			var localPositionThisFrame = Vector3.Lerp(startPosition, Vector3.zero, elapsedTime / moveDurationSeconds);
+			CachedTransform.localPosition = localPositionThisFrame;
+			elapsedTime += Time.deltaTime;
+			yield return null;
+		}
+
+		CachedTransform.localPosition = Vector3.zero;
+		_moveToAnchorRoutine = null;
 	}
 
 	//TODO: Unify use of "highlight" vs "background"

@@ -9,6 +9,8 @@ public class GameController : MonoBehaviour
 	public Texture2D testTexture;
 #endif
 
+	public float imageRevealDuration = 1f;
+
 	public PiecePrefab piecePrefab;
 
 	public PuzzleContainer pContainer;
@@ -20,6 +22,7 @@ public class GameController : MonoBehaviour
 	public StartMenuController startMenu;
 	public PlayFieldMover playFieldMover;
 	public HelpOverlay helpOverlay;
+	public GameObject victoryPanel;
 
 	public MaskContainer maskContainer;
 
@@ -40,6 +43,29 @@ public class GameController : MonoBehaviour
 	{
 		Application.targetFrameRate = 30;
 		Screen.sleepTimeout = SleepTimeout.SystemSetting;
+		PuzzleService.Instance.OnPlayerHasWon += HandlePlayerWon;
+	}
+
+	private void OnDestroy()
+	{
+		var ps = PuzzleService.Instance;
+		if (ps != null)
+		{
+			ps.OnPlayerHasWon -= HandlePlayerWon;
+		}
+	}
+
+	private void HandlePlayerWon()
+	{
+		playFieldMover.ResetPlayFieldZoomAndPosition();
+		ReplacePiecesWithBackgroundOnVictory(playFieldMover.camResetDurationSeconds, imageRevealDuration);
+	}
+
+	private void ReplacePiecesWithBackgroundOnVictory(float camResetDurationSeconds, float imgRevealDurationSeconds)
+	{
+		victoryPanel.gameObject.SetActive(true);
+		pContainer.ReplacePiecesWithBackgroundOnVictory(camResetDurationSeconds, 
+														imgRevealDurationSeconds);
 	}
 
 	public void HelpTapped()
@@ -123,6 +149,7 @@ public class GameController : MonoBehaviour
 	private IEnumerator DoSetupRoutine(Texture2D originalTexture, string originalTexturePath,
 									   SlicedTextureInfo savedTextureInfo = null)
 	{
+		victoryPanel.gameObject.SetActive(false);
 		ShowAndResetLoadingScreen();
 		BackButtonManager.Instance.Suspend();
 
@@ -175,8 +202,8 @@ public class GameController : MonoBehaviour
 
 	private void SetupPrefabs(int rows, int columns, Texture2D slicedTexture, bool tryLoadGameState)
 	{
-		PuzzleService.topRightBounds = pContainer.topRightBounds.position;
-		PuzzleService.bottomLeftBounds = pContainer.bottomLeftBounds.position;
+		PuzzleService.Instance.Setup(rows * columns, pContainer.topRightBounds.position,
+											pContainer.bottomLeftBounds.position);
 
 		var pieceScaleFactor = 1f + (ImgSlicer.PADDING_RATIO * 2f);
 		PuzzleService.pieceScaleFactor = pieceScaleFactor;
@@ -223,7 +250,14 @@ public class GameController : MonoBehaviour
 
 		if (tryLoadGameState)
 		{
-			PuzzleService.Instance.ConnectLoadedPieces();
+			if (gameState.HasWon)
+			{
+				ReplacePiecesWithBackgroundOnVictory(0f, 0f);
+			}
+			else
+			{
+				PuzzleService.Instance.ConnectLoadedPieces();
+			}
 		}
 	}
 }

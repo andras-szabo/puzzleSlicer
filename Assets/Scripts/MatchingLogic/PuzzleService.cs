@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PuzzleService : MonoSingleton<PuzzleService>
@@ -11,16 +12,28 @@ public class PuzzleService : MonoSingleton<PuzzleService>
 
 	public static float pieceScaleFactor;
 
+	public event Action OnPlayerHasWon;
+
 	private List<PiecePrefab> _piecesOnBoard = new List<PiecePrefab>();
 	private List<PiecePrefab> _piecesNotBeingDraggedRightNow = new List<PiecePrefab>();
 
 	private IntVector2 _pieceBeingDragged;
 	private List<PiecePrefab> _piecesWithinSnappingDistance = new List<PiecePrefab>();
 
+	private int _totalPieceCount = -1;
+
 	private GameState _gameState = new GameState();
 
 	public Transform pieceOutlineDisplay;
 	public Transform puzzleContainer;
+
+	public bool IsGameWon
+	{
+		get
+		{
+			return (_gameState != null) ? _gameState.HasWon : false;
+		}
+	}
 
 	public void Reset()
 	{
@@ -28,7 +41,16 @@ public class PuzzleService : MonoSingleton<PuzzleService>
 		_piecesNotBeingDraggedRightNow.Clear();
 		_piecesWithinSnappingDistance.Clear();
 		_pieceBeingDragged = new IntVector2();
+		_totalPieceCount = -1;
 		_gameState.Clear();
+	}
+
+	public void Setup(int totalPieceCount, Vector3 topRight, Vector3 bottomLeft)
+	{
+		topRightBounds = topRight;
+		bottomLeftBounds = bottomLeft;
+		_totalPieceCount = totalPieceCount;
+		_gameState.Setup(_totalPieceCount);
 	}
 
 	private void OnApplicationPause(bool pause)
@@ -49,7 +71,7 @@ public class PuzzleService : MonoSingleton<PuzzleService>
 
 	public GameState TryLoadSavedGameState()
 	{
-		if (_gameState.TryLoad())
+		if (_gameState.TryLoad(_totalPieceCount))
 		{
 			return _gameState;
 		}
@@ -214,6 +236,11 @@ public class PuzzleService : MonoSingleton<PuzzleService>
 
 		_piecesWithinSnappingDistance.Clear();
 		_pieceBeingDragged = new IntVector2(-1, -1);
+
+		if (_gameState.HasWon)
+		{
+			OnPlayerHasWon();
+		}
 	}
 
 	private void ConnectPieces(PiecePrefab a, PiecePrefab b)

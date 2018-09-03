@@ -16,6 +16,10 @@ public class PlayFieldMover : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 	private Vector3 _originalPlayFieldScale = new Vector3(-1f, -1f, -1f);
 	private Vector2 _originalPieceSize = new Vector2(-1f, -1f);
 
+	private Coroutine _scaleLerpRoutine;
+	private Coroutine _containerPositionResetRoutine;
+	public float camResetDurationSeconds;
+
 	public void Reset()
 	{
 		_originalPlayFieldScale = new Vector3(-1f, -1f, -1f);
@@ -39,12 +43,7 @@ public class PlayFieldMover : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 		{
 			_containerPositionResetRoutine = StartCoroutine(LerpPositionToZeroRoutine());
 		}
-		//container.transform.localPosition = Vector3.zero;
 	}
-
-	private Coroutine _scaleLerpRoutine;
-	private Coroutine _containerPositionResetRoutine;
-	public float camResetDurationSeconds;
 
 	private IEnumerator LerpPositionToZeroRoutine()
 	{
