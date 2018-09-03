@@ -1,9 +1,15 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class PlayFieldMover : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
 	public PuzzleContainer container;
+
+#if UNITY_EDITOR
+	[Range(0.1f, 2f)]
+	public float wheelZoomSensitivity = 0.5f;
+#endif
 
 	private int _currentTouchCount;
 	private float _startingPinchDistance;
@@ -20,20 +26,84 @@ public class PlayFieldMover : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 	{
 		if (_originalPlayFieldScale.x > 0f)
 		{
-			container.transform.localScale = _originalPlayFieldScale;
 			PuzzleService.pieceWidth = _originalPieceSize.x;
 			PuzzleService.pieceHeight = _originalPieceSize.y;
+
+			if (_scaleLerpRoutine == null)
+			{
+				_scaleLerpRoutine = StartCoroutine(LerpScaleToOriginalRoutine());
+			}
+		}
+
+		if (_containerPositionResetRoutine == null)
+		{
+			_containerPositionResetRoutine = StartCoroutine(LerpPositionToZeroRoutine());
+		}
+		//container.transform.localPosition = Vector3.zero;
+	}
+
+	private Coroutine _scaleLerpRoutine;
+	private Coroutine _containerPositionResetRoutine;
+	public float camResetDurationSeconds;
+
+	private IEnumerator LerpPositionToZeroRoutine()
+	{
+		var startingPosition = container.transform.localPosition;
+		var elapsedTime = 0f;
+
+		while (elapsedTime < camResetDurationSeconds)
+		{
+			var positionThisFrame = Vector3.Lerp(startingPosition, Vector3.zero, elapsedTime / camResetDurationSeconds);
+			container.transform.localPosition = positionThisFrame;
+			elapsedTime += Time.deltaTime;
+
+			yield return null;
 		}
 
 		container.transform.localPosition = Vector3.zero;
+		_containerPositionResetRoutine = null;
 	}
 
-	private void Update() 
+	private IEnumerator LerpScaleToOriginalRoutine()
 	{
-		UpdateTouchCount();
+		var targetScale = _originalPlayFieldScale;
+		var startingScale = container.transform.localScale;
+		var elapsedTime = 0f;
+
+		while (elapsedTime < camResetDurationSeconds)
+		{
+			var scaleThisFrame = Vector3.Lerp(startingScale, targetScale, elapsedTime / camResetDurationSeconds);
+			container.transform.localScale = scaleThisFrame;
+			elapsedTime += Time.deltaTime;
+
+			yield return null;
+		}
+
+		container.transform.localScale = targetScale;
+		_scaleLerpRoutine = null;
 	}
 
-	private void UpdateTouchCount()
+	private void Update()
+	{
+		UpdateTouchCountAndTryToZoom();
+#if UNITY_EDITOR
+		CheckMouseWheelZoom();
+#endif
+	}
+
+#if UNITY_EDITOR
+	private void CheckMouseWheelZoom()
+	{
+		var wheelZoom = Input.GetAxis("Mouse ScrollWheel");
+
+		if (!Mathf.Approximately(wheelZoom, 0f))
+		{
+			TryZoomBy(1f + (wheelZoom * wheelZoomSensitivity));
+		}
+	}
+#endif
+
+	private void UpdateTouchCountAndTryToZoom()
 	{
 		var pastTouchCount = _currentTouchCount;
 		_currentTouchCount = Input.touchCount;
