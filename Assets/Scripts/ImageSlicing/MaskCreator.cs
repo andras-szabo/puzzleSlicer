@@ -39,17 +39,18 @@ public static class MaskCreator
 
 		var empty = new Color();
 
-		for (int i = 0; i < pixelsToCombine.Length; ++i)
+		for (int i = 0; i < edgeToleranceInPixels; ++i)
 		{
-			int row = i / width;
-			int col = i % width;
-
-			var isEdge = row < edgeToleranceInPixels || row > height - edgeToleranceInPixels ||
-				col < edgeToleranceInPixels || col > width - edgeToleranceInPixels;
-
-			if (isEdge)
+			for (int j = 0; j < width; ++j)
 			{
-				pixelsToCombine[i] = empty;
+				pixelsToCombine[j + (i * width)] = empty;					// bottom rows
+				pixelsToCombine[j + ((height - 1 - i) * width)] = empty;	// top rows
+			}
+
+			for (int j = 0; j < height; ++j)
+			{
+				pixelsToCombine[i + (j * width)] = empty;                   // columns on left edge
+				pixelsToCombine[(width - 1 - i) + (j * width)] = empty;		// columns on the right edge
 			}
 		}
 	}
