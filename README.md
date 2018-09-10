@@ -17,6 +17,12 @@ shader is used to draw the outline of matching connecting pieces.
 
 Changelog:
 
+0.7:
+- mask creation performance improvements
+- zoom on mouse wheel when in editor
+- smooth lerping camera when centering it
+- basic "you've won!" indicator and behaviour
+
 0.6:
 - saving game also when leaving the app via the back button
 - code cleanup
