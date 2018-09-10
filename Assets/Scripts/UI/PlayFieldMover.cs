@@ -26,7 +26,7 @@ public class PlayFieldMover : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 		_originalPieceSize = new Vector2(-1f, -1f);
 	}
 
-	public void ResetPlayFieldZoomAndPosition()
+	public void ResetPlayFieldZoomAndPosition(bool lerpOverTime = true)
 	{
 		if (_originalPlayFieldScale.x > 0f)
 		{
@@ -35,13 +35,27 @@ public class PlayFieldMover : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 
 			if (_scaleLerpRoutine == null)
 			{
-				_scaleLerpRoutine = StartCoroutine(LerpScaleToOriginalRoutine());
+				if (lerpOverTime)
+				{
+					_scaleLerpRoutine = StartCoroutine(LerpScaleToOriginalRoutine());
+				}
+				else
+				{
+					container.transform.localScale = _originalPlayFieldScale;
+				}
 			}
 		}
 
 		if (_containerPositionResetRoutine == null)
 		{
-			_containerPositionResetRoutine = StartCoroutine(LerpPositionToZeroRoutine());
+			if (lerpOverTime)
+			{
+				_containerPositionResetRoutine = StartCoroutine(LerpPositionToZeroRoutine());
+			}
+			else
+			{
+				container.transform.localPosition = Vector3.zero;
+			}
 		}
 	}
 

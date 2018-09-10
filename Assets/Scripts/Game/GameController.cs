@@ -163,6 +163,8 @@ public class GameController : MonoBehaviour
 		ShowAndResetLoadingScreen();
 		BackButtonManager.Instance.Suspend();
 
+		playFieldMover.ResetPlayFieldZoomAndPosition(lerpOverTime: false);
+
 		_pieceInfos.Clear();
 
 		var originalSize = new Vector2(originalTexture.width, originalTexture.height);
