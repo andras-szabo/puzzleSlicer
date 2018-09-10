@@ -28,7 +28,8 @@ public class PuzzleContainer : MonoBehaviour
 		_pieceAnchors.Clear();
 	}
 
-	public void ToggleHighlights()
+#if UNITY_EDITOR
+	public void ToggleHighlightsInEditor()
 	{
 		_forcedHighlights = !_forcedHighlights;
 		var piecesOnBoard = GetComponentsInChildren<PiecePrefab>();
@@ -37,6 +38,7 @@ public class PuzzleContainer : MonoBehaviour
 			piece.ForceShowHighlight(_forcedHighlights);
 		}
 	}
+#endif
 
 	public void ToggleBackground()
 	{

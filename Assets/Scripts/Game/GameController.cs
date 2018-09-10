@@ -44,7 +44,7 @@ public class GameController : MonoBehaviour
 	{
 		if (Input.GetKeyDown(KeyCode.H))
 		{
-			pContainer.ToggleHighlights();
+			pContainer.ToggleHighlightsInEditor();
 		}
 	}
 #endif
