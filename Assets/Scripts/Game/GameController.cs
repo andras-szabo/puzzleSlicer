@@ -253,7 +253,7 @@ public class GameController : MonoBehaviour
 					PuzzleService.Instance.MarkPieceOnPlayingField(newPrefab);
 					newPrefab.transform.position = gameState.GetWorldPosition(col, row);
 					anchorInPool.gameObject.SetActive(false);
-					newPrefab.MoveBackgroundToBackgroundDisplay();
+					newPrefab.TryMoveBackgroundToBackgroundDisplay();
 				}
 			}
 		}

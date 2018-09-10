@@ -38,6 +38,7 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 	public bool IsFullySurrounded { get; set; }
 
 	private bool _forcedHighlight;
+	private bool _backgroundAlreadyMovedToBackgroundDisplay;
 
 	private Transform _backgroundTransform;
 	public Transform BackgroundTransform
@@ -284,10 +285,14 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 		pieceBackgroundImage.enabled = state;
 	}
 
-	public void MoveBackgroundToBackgroundDisplay()
+	public void TryMoveBackgroundToBackgroundDisplay()
 	{
-		BackgroundTransform.localScale = new Vector3(UPSCALE_OF_SELECTED_PIECE, UPSCALE_OF_SELECTED_PIECE, 0f);
-		BackgroundTransform.SetParent(PuzzleService.Instance.pieceOutlineDisplay, true);
+		if (!_backgroundAlreadyMovedToBackgroundDisplay)
+		{
+			BackgroundTransform.localScale = new Vector3(UPSCALE_OF_SELECTED_PIECE, UPSCALE_OF_SELECTED_PIECE, 0f);
+			BackgroundTransform.SetParent(PuzzleService.Instance.pieceOutlineDisplay, true);
+			_backgroundAlreadyMovedToBackgroundDisplay = true;
+		}
 	}
 
 	private Coroutine _moveToAnchorRoutine;
@@ -331,7 +336,7 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 		rt.offsetMax = Vector2.zero;
 		rt.offsetMin = Vector2.zero;
 
-		MoveBackgroundToBackgroundDisplay();
+		TryMoveBackgroundToBackgroundDisplay();
 
 		HideHighlight();
 		MoveTo(new Vector3(PuzzleService.topRightBounds.x, currentVerticalPosition, 0f));
