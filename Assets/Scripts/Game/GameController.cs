@@ -39,6 +39,16 @@ public class GameController : MonoBehaviour
 #endif
 	}
 
+#if UNITY_EDITOR
+	private void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.H))
+		{
+			pContainer.ToggleHighlights();
+		}
+	}
+#endif
+
 	private void SetAppSettings()
 	{
 		Application.targetFrameRate = 30;

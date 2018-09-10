@@ -14,6 +14,10 @@ public class PuzzleContainer : MonoBehaviour
 
 	public RawImage helperBackgroundImg;
 
+#if UNITY_EDITOR
+	private bool _forcedHighlights;
+#endif
+
 	private void Cleanup()
 	{
 		foreach (var anchor in _pieceAnchors.Values)
@@ -22,6 +26,16 @@ public class PuzzleContainer : MonoBehaviour
 		}
 
 		_pieceAnchors.Clear();
+	}
+
+	public void ToggleHighlights()
+	{
+		_forcedHighlights = !_forcedHighlights;
+		var piecesOnBoard = GetComponentsInChildren<PiecePrefab>();
+		foreach (var piece in piecesOnBoard)
+		{
+			piece.ForceShowHighlight(_forcedHighlights);
+		}
 	}
 
 	public void ToggleBackground()

@@ -37,6 +37,8 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 	public bool IsFreeStanding { get { return connectedPieces.Count == 1; } }
 	public bool IsFullySurrounded { get; set; }
 
+	private bool _forcedHighlight;
+
 	private Transform _backgroundTransform;
 	public Transform BackgroundTransform
 	{
@@ -262,7 +264,10 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 
 	public void HideHighlight()
 	{
-		pieceBackgroundImage.enabled = false;
+		if (!_forcedHighlight)
+		{
+			pieceBackgroundImage.enabled = false;
+		}
 	}
 
 	public void ShowHighlightIfNotFullySurrounded()
@@ -271,6 +276,12 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 		{
 			pieceBackgroundImage.enabled = true;
 		}
+	}
+
+	public void ForceShowHighlight(bool state)
+	{
+		_forcedHighlight = state;
+		pieceBackgroundImage.enabled = state;
 	}
 
 	public void MoveBackgroundToBackgroundDisplay()
