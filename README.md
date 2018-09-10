@@ -17,6 +17,11 @@ shader is used to draw the outline of matching connecting pieces.
 
 Changelog:
 
+0.8:
+- fixing a bug with disappearing background/outlines
+- fixing a bug with viewport positioning
+- small tweak to mask textures
+
 0.7:
 - mask creation performance improvements
 - zoom on mouse wheel when in editor
