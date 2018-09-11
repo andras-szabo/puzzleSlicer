@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class PuzzlePiecePool : MonoBehaviour
+public class PuzzlePiecePool : MonoSingleton<PuzzlePiecePool>
 {
 	public Transform poolAnchor;
 	public Transform scrollRectContent;
@@ -9,7 +9,7 @@ public class PuzzlePiecePool : MonoBehaviour
 
 	private Transform[] anchors;
 
-	private void Cleanup()
+	public override void Cleanup()
 	{
 		if (anchors != null)
 		{

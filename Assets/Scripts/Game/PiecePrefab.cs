@@ -10,7 +10,8 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 	public const float UPSCALE_OF_SELECTED_PIECE = 1.02f;
 	public const float DOUBLE_TAP_BREAK_INTERVAL = 0.2f;
 	public static bool IGNORE_BOUNDS_CHECK = true;
-	public static float UPSCALE_BACKGROUND = 1f;
+	public const float UPSCALE_BACKGROUND = 1f;
+	public const float PIECE_MOVE_TO_BOARD_HORIZONTAL_THRESHOLD_WORLD_UNITS = 10f;
 
 	public RawImage pieceRawImage;
 	public RawImage pieceBackgroundImage;
@@ -45,7 +46,7 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 	{
 		get
 		{
-			return ServiceLocator.Get<IBoardService>();	
+			return ServiceLocator.Get<IBoardService>();
 		}
 	}
 
@@ -111,20 +112,14 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 		return true;
 	}
 
+	#region pointerHandlers
+
 	public void OnBeginDrag(PointerEventData eventData)
 	{
-	}
-
-	public void ScaleUp()
-	{
-		var upScaleFactor = BoardContext.DefaultPieceScaleFactor * UPSCALE_OF_SELECTED_PIECE;
-		CachedTransform.localScale = new Vector3(upScaleFactor, upScaleFactor, 0f);
-	}
-
-	public void ScaleToNormalSize()
-	{
-		CachedTransform.localScale = new Vector3(BoardContext.DefaultPieceScaleFactor,
-												 BoardContext.DefaultPieceScaleFactor, 0f);
+		if (!_isOnPlayingField)
+		{
+			PuzzlePiecePool.Instance.scrollRect.OnBeginDrag(eventData);
+		}
 	}
 
 	public void OnDrag(PointerEventData eventData)
@@ -134,9 +129,10 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 			return;
 		}
 
+		var delta = new Vector3(eventData.delta.x, eventData.delta.y, 0f);
+
 		if (_isOnPlayingField)
 		{
-			var delta = new Vector3(eventData.delta.x, eventData.delta.y, 0f);
 			var newPosition = CachedTransform.position + delta;
 
 			if (IGNORE_BOUNDS_CHECK || IsWithinBounds(newPosition))
@@ -149,12 +145,17 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 
 			BoardService.ShowPiecesInSnappingDistanceTo(connectedPieces, BoardPosition);
 		}
-	}
-
-	private bool IsWithinBounds(Vector3 position)
-	{
-		return position.x > BoardContext.BottomLeftBounds.x && position.x < BoardContext.TopRightBounds.x &&
-			   position.y > BoardContext.BottomLeftBounds.y && position.y < BoardContext.TopRightBounds.y;
+		else
+		{
+			if (delta.x < -PIECE_MOVE_TO_BOARD_HORIZONTAL_THRESHOLD_WORLD_UNITS)
+			{
+				MoveToPlayingField();
+			}
+			else
+			{
+				PuzzlePiecePool.Instance.scrollRect.OnDrag(eventData);
+			}
+		}
 	}
 
 	public void OnEndDrag(PointerEventData eventData)
@@ -164,30 +165,13 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 			return;
 		}
 
-		ScaleToNormalSize();
-	}
-
-	public void MoveToFront()
-	{
-		pieceAnchor.SetAsLastSibling();
-	}
-
-	public void Setup(Texture2D paddedTexture, Vector2 uv, Vector2 pieceSize, int posx, int posy, bool isOnPlayingField)
-	{
-		var uvRect = new Rect(uv, pieceSize);
-		pieceRawImage.texture = paddedTexture;
-		pieceRawImage.uvRect = uvRect;
-
-		pieceBackgroundImage.texture = paddedTexture;
-		pieceBackgroundImage.uvRect = uvRect;
-
-		BackgroundTransform.localScale = new Vector3(UPSCALE_BACKGROUND, UPSCALE_BACKGROUND, 0f);
-
-		BoardPosition = new IntVector2(posx, posy);
-		_isOnPlayingField = isOnPlayingField;
 		if (_isOnPlayingField)
 		{
-			connectedPieces.Add(this);
+			ScaleToNormalSize();
+		}
+		else
+		{
+			PuzzlePiecePool.Instance.scrollRect.OnEndDrag(eventData);
 		}
 	}
 
@@ -214,10 +198,6 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 				piece.ScaleUp();
 			}
 		}
-		else
-		{
-			MoveToPlayingField();
-		}
 	}
 
 	public void OnPointerUp(PointerEventData eventData)
@@ -242,6 +222,49 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 					MoveBackToPool();
 				}
 			}
+		}
+	}
+	#endregion
+
+	public void ScaleUp()
+	{
+		var upScaleFactor = BoardContext.DefaultPieceScaleFactor * UPSCALE_OF_SELECTED_PIECE;
+		CachedTransform.localScale = new Vector3(upScaleFactor, upScaleFactor, 0f);
+	}
+
+	public void ScaleToNormalSize()
+	{
+		CachedTransform.localScale = new Vector3(BoardContext.DefaultPieceScaleFactor,
+												 BoardContext.DefaultPieceScaleFactor, 0f);
+	}
+
+	private bool IsWithinBounds(Vector3 position)
+	{
+		return position.x > BoardContext.BottomLeftBounds.x && position.x < BoardContext.TopRightBounds.x &&
+			   position.y > BoardContext.BottomLeftBounds.y && position.y < BoardContext.TopRightBounds.y;
+	}
+
+	public void MoveToFront()
+	{
+		pieceAnchor.SetAsLastSibling();
+	}
+
+	public void Setup(Texture2D paddedTexture, Vector2 uv, Vector2 pieceSize, int posx, int posy, bool isOnPlayingField)
+	{
+		var uvRect = new Rect(uv, pieceSize);
+		pieceRawImage.texture = paddedTexture;
+		pieceRawImage.uvRect = uvRect;
+
+		pieceBackgroundImage.texture = paddedTexture;
+		pieceBackgroundImage.uvRect = uvRect;
+
+		BackgroundTransform.localScale = new Vector3(UPSCALE_BACKGROUND, UPSCALE_BACKGROUND, 0f);
+
+		BoardPosition = new IntVector2(posx, posy);
+		_isOnPlayingField = isOnPlayingField;
+		if (_isOnPlayingField)
+		{
+			connectedPieces.Add(this);
 		}
 	}
 
@@ -335,7 +358,7 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 	//TODO: Unify use of "highlight" vs "background"
 	private void MoveToPlayingField()
 	{
-		var currentVerticalPosition = Mathf.Clamp(CachedTransform.position.y, 
+		var currentVerticalPosition = Mathf.Clamp(CachedTransform.position.y,
 												  BoardContext.BottomLeftBounds.y,
 												  BoardContext.TopRightBounds.y);
 

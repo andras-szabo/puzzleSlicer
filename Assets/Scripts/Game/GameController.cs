@@ -67,6 +67,11 @@ public class GameController : MonoBehaviour
 		helpOverlay.gameObject.SetActive(true);
 	}
 
+	public void OnBringPiecesToFrontTapped()
+	{
+		ServiceLocator.Get<IBoardService>().BringFreeStandingPiecesToTheFront();
+	}
+
 	public void OnExitTapped()
 	{
 		BackButtonManager.Instance.Pop(_backButtonCallbackID);

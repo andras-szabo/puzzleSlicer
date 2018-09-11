@@ -1105,7 +1105,7 @@ MonoBehaviour:
   m_Interactable: 1
   m_TargetGraphic: {fileID: 1256982564}
   m_HandleRect: {fileID: 1256982563}
-  m_Direction: 3
+  m_Direction: 2
   m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
@@ -2233,7 +2233,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Tap a piece in the queue to move it on the board.
+  m_Text: Drag and drop a piece from the queue to the board.
 --- !u!222 &720302014
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4496,8 +4496,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_MethodName: BringFreeStandingPiecesToTheFront
+      - m_Target: {fileID: 1336305816}
+        m_MethodName: OnBringPiecesToFrontTapped
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5534,6 +5534,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a295224c6a52e14408af6f674b10d9b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dontDestroyOnLoad: 0
   poolAnchor: {fileID: 1435858544}
   scrollRectContent: {fileID: 127352064}
   scrollRect: {fileID: 1639896516}
