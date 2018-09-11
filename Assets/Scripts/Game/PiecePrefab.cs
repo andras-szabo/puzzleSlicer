@@ -9,7 +9,6 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 {
 	public const float UPSCALE_OF_SELECTED_PIECE = 1.02f;
 	public const float DOUBLE_TAP_BREAK_INTERVAL = 0.2f;
-	public static bool IGNORE_BOUNDS_CHECK = true;
 	public const float UPSCALE_BACKGROUND = 1f;
 	public const float PIECE_MOVE_TO_BOARD_HORIZONTAL_THRESHOLD_WORLD_UNITS = 10f;
 
@@ -41,6 +40,8 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 
 	private bool _forcedHighlight;
 	private bool _backgroundAlreadyMovedToBackgroundDisplay;
+	
+	private Coroutine _moveToAnchorRoutine;
 
 	private IBoardService BoardService
 	{
@@ -64,7 +65,6 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 		if (IsNotYetConnectedTo(other))
 		{
 			connectedPieces.Add(other);
-
 			IsFullySurrounded = IsFullySurrounded || CheckIfFullySurrounded();
 		}
 	}
@@ -75,19 +75,13 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 
 		if (connectedPieces.Count > 4)
 		{
-			var top = BoardPosition + IntVector2.Up();
-			var right = BoardPosition + IntVector2.Right();
-			var left = BoardPosition + IntVector2.Left();
-			var bottom = BoardPosition + IntVector2.Down();
-
 			var surroundingPieceCount = 0;
 
 			for (int i = 0; i < connectedPieces.Count && surroundingPieceCount < 4; ++i)
 			{
-				if (connectedPieces[i].BoardPosition == top ||
-					connectedPieces[i].BoardPosition == right ||
-					connectedPieces[i].BoardPosition == left ||
-					connectedPieces[i].BoardPosition == bottom)
+				var distance = connectedPieces[i].BoardPosition - BoardPosition;
+				var crudeDistanceLength = distance.x + distance.y;
+				if (crudeDistanceLength == 1 || crudeDistanceLength == -1)
 				{
 					surroundingPieceCount++;
 				}
@@ -101,15 +95,7 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 
 	private bool IsNotYetConnectedTo(PiecePrefab other)
 	{
-		foreach (var piece in connectedPieces)
-		{
-			if (other.BoardPosition == piece.BoardPosition)
-			{
-				return false;
-			}
-		}
-
-		return true;
+		return !connectedPieces.Contains(other);
 	}
 
 	#region pointerHandlers
@@ -135,12 +121,9 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 		{
 			var newPosition = CachedTransform.position + delta;
 
-			if (IGNORE_BOUNDS_CHECK || IsWithinBounds(newPosition))
+			foreach (var piece in connectedPieces)
 			{
-				foreach (var piece in connectedPieces)
-				{
-					piece.MoveBy(delta);
-				}
+				piece.MoveBy(delta);
 			}
 
 			BoardService.ShowPiecesInSnappingDistanceTo(connectedPieces, BoardPosition);
@@ -239,12 +222,6 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 												 BoardContext.DefaultPieceScaleFactor, 0f);
 	}
 
-	private bool IsWithinBounds(Vector3 position)
-	{
-		return position.x > BoardContext.BottomLeftBounds.x && position.x < BoardContext.TopRightBounds.x &&
-			   position.y > BoardContext.BottomLeftBounds.y && position.y < BoardContext.TopRightBounds.y;
-	}
-
 	public void MoveToFront()
 	{
 		pieceAnchor.SetAsLastSibling();
@@ -274,9 +251,9 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 		CachedTransform.SetParent(anchorInPool, false);
 		pieceBackgroundImage.enabled = false;
 
-		var rt = GetComponent<RectTransform>();
-		rt.offsetMax = Vector2.zero;
-		rt.offsetMin = Vector2.zero;
+		var rectTransform = GetComponent<RectTransform>();
+		rectTransform.offsetMax = Vector2.zero;
+		rectTransform.offsetMin = Vector2.zero;
 
 		connectedPieces.Clear();
 		_isOnPlayingField = false;
@@ -292,24 +269,17 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 
 	public void MoveBy(Vector3 delta)
 	{
-		var newPosition = CachedTransform.position + delta;
-		MoveTo(newPosition);
+		MoveTo(CachedTransform.position + delta);
 	}
 
 	public void HideHighlight()
 	{
-		if (!_forcedHighlight)
-		{
-			pieceBackgroundImage.enabled = false;
-		}
+		pieceBackgroundImage.enabled = _forcedHighlight;
 	}
 
 	public void ShowHighlightIfNotFullySurrounded()
 	{
-		if (!IsFullySurrounded)
-		{
-			pieceBackgroundImage.enabled = true;
-		}
+		pieceBackgroundImage.enabled = !IsFullySurrounded;
 	}
 
 	public void ForceShowHighlight(bool state)
@@ -327,8 +297,6 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 			_backgroundAlreadyMovedToBackgroundDisplay = true;
 		}
 	}
-
-	private Coroutine _moveToAnchorRoutine;
 
 	// TODO: Disable movement while moving to anchored pos
 	public void MoveToAnchoredPosition(float moveDurationSeconds)
