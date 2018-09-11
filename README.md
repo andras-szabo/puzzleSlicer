@@ -17,6 +17,12 @@ shader is used to draw the outline of matching connecting pieces.
 
 Changelog:
 
+0.9:
+- drag-and-drop from the queue to the play field
+- queue now has a scroll bar
+- better help overlay
+- under-the-hood refactoring
+
 0.8:
 - fixing a bug with disappearing background/outlines
 - fixing a bug with viewport positioning
