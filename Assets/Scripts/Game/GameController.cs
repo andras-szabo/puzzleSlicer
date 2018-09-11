@@ -130,14 +130,18 @@ public class GameController : MonoBehaviour
 	public void TryStartNewGame()
 	{
 #if !UNITY_EDITOR
-		TryLoadTextureToSlice();
+		StartCoroutine(TryLoadTextureToSliceRoutine());
 #else
 		StartCoroutine(DoSetupRoutine(testTexture, ""));
 #endif
 	}
 
-	private void TryLoadTextureToSlice()
+	private IEnumerator TryLoadTextureToSliceRoutine()
 	{
+		PrepareUIForSetup();
+
+		yield return null;
+
 		var permission = NativeGallery.GetImageFromGallery(OnImagePicked, "Please pick an image");
 		Debug.Log(permission);
 	}
