@@ -20,7 +20,7 @@ public class PlayFieldMover : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 	private Coroutine _containerPositionResetRoutine;
 	public float camResetDurationSeconds;
 
-	public void Reset()
+	public void Init()
 	{
 		_originalPlayFieldScale = new Vector3(-1f, -1f, -1f);
 		_originalPieceSize = new Vector2(-1f, -1f);
@@ -30,8 +30,7 @@ public class PlayFieldMover : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 	{
 		if (_originalPlayFieldScale.x > 0f)
 		{
-			PuzzleService.pieceWidth = _originalPieceSize.x;
-			PuzzleService.pieceHeight = _originalPieceSize.y;
+			BoardContext.Instance.SetPieceDimensions(_originalPieceSize);
 
 			if (_scaleLerpRoutine == null)
 			{
@@ -168,14 +167,14 @@ public class PlayFieldMover : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 
 		container.transform.localScale = new Vector3(currentScale.x * increment, currentScale.y * increment, 0f);
 
-		PuzzleService.pieceWidth *= increment;
-		PuzzleService.pieceHeight *= increment;
+		BoardContext.Instance.AdjustPieceDimensions(increment);
 	}
 
 	private void RecordOriginalScale(Vector3 scale)
 	{
 		_originalPlayFieldScale = scale;
-		_originalPieceSize = new Vector2(PuzzleService.pieceWidth, PuzzleService.pieceHeight);
+		_originalPieceSize = new Vector2(BoardContext.PieceWidthInWorldUnits, 
+										 BoardContext.PieceHeightInWorldUnits);
 	}
 
 	public void OnBeginDrag(PointerEventData eventData)

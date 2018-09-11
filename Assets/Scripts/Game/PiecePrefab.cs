@@ -25,6 +25,7 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 
 	[HideInInspector] public Transform pieceAnchor;
 	[HideInInspector] public Transform anchorInPool;
+	[HideInInspector] public Transform pieceOutlineContainer;
 
 	private bool _isOnPlayingField;
 	private float _lastTapDownTime;
@@ -39,6 +40,14 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 
 	private bool _forcedHighlight;
 	private bool _backgroundAlreadyMovedToBackgroundDisplay;
+
+	private IBoardService BoardService
+	{
+		get
+		{
+			return ServiceLocator.Get<IBoardService>();	
+		}
+	}
 
 	private Transform _backgroundTransform;
 	public Transform BackgroundTransform
@@ -108,14 +117,14 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 
 	public void ScaleUp()
 	{
-		var upScaleFactor = PuzzleService.pieceScaleFactor * UPSCALE_OF_SELECTED_PIECE;
+		var upScaleFactor = BoardContext.DefaultPieceScaleFactor * UPSCALE_OF_SELECTED_PIECE;
 		CachedTransform.localScale = new Vector3(upScaleFactor, upScaleFactor, 0f);
 	}
 
 	public void ScaleToNormalSize()
 	{
-		CachedTransform.localScale = new Vector3(PuzzleService.pieceScaleFactor,
-												 PuzzleService.pieceScaleFactor, 0f);
+		CachedTransform.localScale = new Vector3(BoardContext.DefaultPieceScaleFactor,
+												 BoardContext.DefaultPieceScaleFactor, 0f);
 	}
 
 	public void OnDrag(PointerEventData eventData)
@@ -138,14 +147,14 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 				}
 			}
 
-			PuzzleService.Instance.ShowPiecesInSnappingDistanceTo(connectedPieces, BoardPosition);
+			BoardService.ShowPiecesInSnappingDistanceTo(connectedPieces, BoardPosition);
 		}
 	}
 
 	private bool IsWithinBounds(Vector3 position)
 	{
-		return position.x > PuzzleService.bottomLeftBounds.x && position.x < PuzzleService.topRightBounds.x &&
-			   position.y > PuzzleService.bottomLeftBounds.y && position.y < PuzzleService.topRightBounds.y;
+		return position.x > BoardContext.BottomLeftBounds.x && position.x < BoardContext.TopRightBounds.x &&
+			   position.y > BoardContext.BottomLeftBounds.y && position.y < BoardContext.TopRightBounds.y;
 	}
 
 	public void OnEndDrag(PointerEventData eventData)
@@ -215,7 +224,7 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 	{
 		if (_isOnPlayingField)
 		{
-			PuzzleService.Instance.ConnectPiecesWithinSnappingDistanceTo(this);
+			BoardService.ConnectPiecesWithinSnappingDistanceTo(this);
 		}
 
 		foreach (var piece in connectedPieces)
@@ -247,7 +256,7 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 
 		connectedPieces.Clear();
 		_isOnPlayingField = false;
-		PuzzleService.Instance.MarkPieceInPool(this);
+		BoardService.MarkPieceInPool(this);
 		anchorInPool.gameObject.SetActive(true);
 	}
 
@@ -290,7 +299,7 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 		if (!_backgroundAlreadyMovedToBackgroundDisplay)
 		{
 			BackgroundTransform.localScale = new Vector3(UPSCALE_OF_SELECTED_PIECE, UPSCALE_OF_SELECTED_PIECE, 0f);
-			BackgroundTransform.SetParent(PuzzleService.Instance.pieceOutlineDisplay, true);
+			BackgroundTransform.SetParent(pieceOutlineContainer, true);
 			_backgroundAlreadyMovedToBackgroundDisplay = true;
 		}
 	}
@@ -326,11 +335,12 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 	//TODO: Unify use of "highlight" vs "background"
 	private void MoveToPlayingField()
 	{
-		var currentVerticalPosition = Mathf.Clamp(CachedTransform.position.y, PuzzleService.bottomLeftBounds.y,
-												  PuzzleService.topRightBounds.y);
+		var currentVerticalPosition = Mathf.Clamp(CachedTransform.position.y, 
+												  BoardContext.BottomLeftBounds.y,
+												  BoardContext.TopRightBounds.y);
 
 		CachedTransform.SetParent(pieceAnchor, true);
-		CachedTransform.localScale = new Vector3(PuzzleService.pieceScaleFactor, PuzzleService.pieceScaleFactor, 0f);
+		CachedTransform.localScale = new Vector3(BoardContext.DefaultPieceScaleFactor, BoardContext.DefaultPieceScaleFactor, 0f);
 
 		var rt = GetComponent<RectTransform>();
 		rt.offsetMax = Vector2.zero;
@@ -339,7 +349,7 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 		TryMoveBackgroundToBackgroundDisplay();
 
 		HideHighlight();
-		MoveTo(new Vector3(PuzzleService.topRightBounds.x, currentVerticalPosition, 0f));
+		MoveTo(new Vector3(BoardContext.TopRightBounds.x, currentVerticalPosition, 0f));
 
 		anchorInPool.gameObject.SetActive(false);
 
@@ -347,7 +357,7 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 
 		connectedPieces.Add(this);
 
-		PuzzleService.Instance.MarkPieceOnPlayingField(this);
+		BoardService.MarkPieceOnPlayField(this);
 
 		MoveToFront();
 	}

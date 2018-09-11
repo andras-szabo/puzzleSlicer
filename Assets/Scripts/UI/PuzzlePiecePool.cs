@@ -22,7 +22,7 @@ public class PuzzlePiecePool : MonoBehaviour
 		}
 	}
 
-	public void Setup(SlicingInfo sliceInfo)
+	public void Init(SlicingInfo sliceInfo)
 	{
 		Cleanup();
 

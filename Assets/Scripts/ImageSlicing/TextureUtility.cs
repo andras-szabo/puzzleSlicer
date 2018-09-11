@@ -1,16 +1,5 @@
 ﻿using UnityEngine;
 
-public static class Paths
-{
-	public static string TEXTURE_SAVED = "_activeTexture.png";
-	public static string SAVED_TEXTURE_INFO = "_activeTexture.json";
-
-	public static string GetFullDataPath(string file)
-	{
-		return System.IO.Path.Combine(Application.persistentDataPath, file);
-	}
-}
-
 public struct Dimension
 {
 	public int currentRow;
@@ -52,7 +41,7 @@ public static class TextureUtility
 
 		slicedTexture = new Texture2D(slicedTexSizeX, slicedTexSizeY);
 
-		var pathToSavedTexture = Paths.GetFullDataPath(Paths.TEXTURE_SAVED);
+		var pathToSavedTexture = Paths.GetFullPathToSavedTexture();
 
 		if (System.IO.File.Exists(pathToSavedTexture) && slicedTextureInfo != null && slicedTextureInfo.originalPath == originalTexturePath)
 		{
@@ -165,7 +154,7 @@ public static class TextureUtility
 
 		try
 		{
-			var path = Paths.GetFullDataPath(Paths.TEXTURE_SAVED);
+			var path = Paths.GetFullPathToSavedTexture();
 			System.IO.File.WriteAllBytes(path, pngData);
 			success = true;
 
@@ -195,7 +184,7 @@ public static class TextureUtility
 		};
 
 		var asJson = JsonUtility.ToJson(info, true);
-		var path = Paths.GetFullDataPath(Paths.SAVED_TEXTURE_INFO);
+		var path = Paths.GetFullPathToSavedTextureInfo();
 
 		try
 		{
@@ -209,11 +198,11 @@ public static class TextureUtility
 		Debug.LogWarning("Saved info to: " + path);
 	}
 
-	public static SlicedTextureInfo TryGetSavedTextureInfo()
+	public static bool TryGetSavedTextureInfo(out SlicedTextureInfo savedTextureInfo)
 	{
-		var pathToSavedFileInfo = Paths.GetFullDataPath(Paths.SAVED_TEXTURE_INFO);
+		var pathToSavedFileInfo = Paths.GetFullPathToSavedTextureInfo();
 
-		SlicedTextureInfo loadedInfo = null;
+		savedTextureInfo = null;
 
 		if (System.IO.File.Exists(pathToSavedFileInfo))
 		{
@@ -224,7 +213,7 @@ public static class TextureUtility
 				asJson = System.IO.File.ReadAllText(pathToSavedFileInfo);
 				if (!string.IsNullOrEmpty(asJson))
 				{
-					loadedInfo = JsonUtility.FromJson<SlicedTextureInfo>(asJson);
+					savedTextureInfo = JsonUtility.FromJson<SlicedTextureInfo>(asJson);
 				}
 			}
 			catch (System.Exception e)
@@ -233,6 +222,6 @@ public static class TextureUtility
 			}
 		}
 
-		return loadedInfo;
+		return savedTextureInfo != null;
 	}
 }

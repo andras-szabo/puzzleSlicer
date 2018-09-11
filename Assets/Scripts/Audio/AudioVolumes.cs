@@ -9,25 +9,19 @@ public class AudioVolumes : ScriptableObject
 	public float pieceTapStart;
 	public float pieceTapEnd;
 
-	public float StartVolume(AudioSFX sfx)
+	public float this[AudioSFX sfx]
 	{
-		switch (sfx)
+		get
 		{
-			case AudioSFX.ButtonClick: return buttonTapStart;
-			case AudioSFX.PieceClick: return pieceTapStart;
+			switch (sfx)
+			{
+				case AudioSFX.ButtonTapStart: return buttonTapStart;
+				case AudioSFX.ButtonTapEnd: return buttonTapEnd;
+				case AudioSFX.PieceTapStart: return pieceTapStart;
+				case AudioSFX.PieceTapEnd: return pieceTapEnd;
+				default:
+					return 0f;
+			}
 		}
-
-		return 0f;
-	}
-
-	public float EndVolume(AudioSFX sfx)
-	{
-		switch (sfx)
-		{
-			case AudioSFX.ButtonClick: return buttonTapEnd;
-			case AudioSFX.PieceClick: return pieceTapEnd;
-		}
-
-		return 0f;
 	}
 }

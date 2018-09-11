@@ -16,7 +16,7 @@ public class QuitConfirmPopup : MonoBehaviour
 
 	public void TrySaveAndQuit()
 	{
-		PuzzleService.Instance.TrySaveGameState();
+		ServiceLocator.Get<IGameStateService>().Save();
 		Application.Quit();
 	}
 

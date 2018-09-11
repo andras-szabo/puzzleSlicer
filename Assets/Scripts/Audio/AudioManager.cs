@@ -1,6 +1,15 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+public enum AudioSFX
+{
+	None,
+	ButtonTapStart,
+	ButtonTapEnd,
+	PieceTapStart,
+	PieceTapEnd
+}
+
 [RequireComponent(typeof(AudioSource))]
 public class AudioManager : MonoSingleton<AudioManager>
 {
@@ -9,18 +18,23 @@ public class AudioManager : MonoSingleton<AudioManager>
 	{
 		switch (sfx)
 		{
-			case AudioSFX.ButtonClick: return "click";
-			case AudioSFX.PieceClick: return "click_high";
+			case AudioSFX.ButtonTapStart:
+			case AudioSFX.ButtonTapEnd:
+				return "click";
+
+			case AudioSFX.PieceTapStart:
+			case AudioSFX.PieceTapEnd:
+				return "click_high";
 		}
 
 		return string.Empty;
 	}
 
 	private bool _sfx;
-	public bool SFX 
-	{ 
-		get 
-		{ 
+	public bool SFX
+	{
+		get
+		{
 			return _sfx;
 		}
 
@@ -35,6 +49,7 @@ public class AudioManager : MonoSingleton<AudioManager>
 	private AudioSource Source { get { return _source ?? (_source = GetComponent<AudioSource>()); } }
 
 	public AudioClip[] clips;
+	public AudioVolumes volumes;
 
 	private Dictionary<string, AudioClip> _clipsByName = new Dictionary<string, AudioClip>();
 
@@ -50,9 +65,9 @@ public class AudioManager : MonoSingleton<AudioManager>
 		}
 	}
 
-	public void Play(AudioSFX sfx, float volumePercent = 100f)
+	public void Play(AudioSFX sfx)
 	{
-		Play(GetClipForEnum(sfx), volumePercent);
+		Play(GetClipForEnum(sfx), volumes[sfx]);
 	}
 
 	public override void Setup()

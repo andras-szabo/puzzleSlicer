@@ -127,14 +127,18 @@ public static class ImgSlicer
 	// the masked pieces onto a larger texture. Then we can use that one and only texture, with different UVs, to draw every
 	// single piece.
 
-	public static IEnumerator CreateAndSaveSlicedTextureRoutine(int rows, int columns, Texture2D originalTexture,
-																Vector2 originalSize, Texture2D slicedTexture,
+	public static IEnumerator CreateAndSaveSlicedTextureRoutine(SlicingInfo slicingInfo, Texture2D originalTexture,
+																Texture2D slicedTexture,
 																string originalTexturePath,
 																MaskContainer maskContainer,
 																Dictionary<IntVector2, PieceInfo> pieceInfos,
 																System.Action<float> onProgress)
 	{
 		//TODO maybe we could rationalize these
+		var rows = slicingInfo.rows;
+		var columns = slicingInfo.columns;
+		var originalSize = new Vector2(originalTexture.width, originalTexture.height);
+
 		var paddedPieceSize = GetPaddedPieceSize(rows, columns, originalSize);
 		var pieceSize = new Vector2((float)originalSize.x / (float)columns,
 									(float)originalSize.y / (float)rows);
@@ -208,10 +212,11 @@ public static class ImgSlicer
 		MaskCreator.CreateMask(left, top, right, bottom, maskPixels);
 	}
 
-	public static void SetupConnections(SlicingInfo sliceInfo, Dictionary<IntVector2, PieceInfo> pieceInfos)
+	public static Dictionary<IntVector2, PieceInfo> SetupConnections(SlicingInfo sliceInfo)
 	{
 		var rows = sliceInfo.rows;
 		var columns = sliceInfo.columns;
+		var pieceInfos = new Dictionary<IntVector2, PieceInfo>();
 
 		for (int col = 0; col < columns; ++col)
 		{
@@ -236,6 +241,8 @@ public static class ImgSlicer
 				}
 			}
 		}
+
+		return pieceInfos;
 	}
 
 	public static void SetupConnectionToRight(int col, int row, Dictionary<IntVector2, PieceInfo> pieceInfos)

@@ -1,37 +1,35 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
+	public const float IMG_REVEAL_DURATION_SECONDS = 1f;
+	public const int TARGET_FRAMERATE = 30;
+
 #if UNITY_EDITOR
-	public Texture2D testTexture;
+	[SerializeField] private Texture2D testTexture;
 #endif
 
-	public float imageRevealDuration = 1f;
+	[SerializeField] private PiecePrefab piecePrefabPrototype;
+	[SerializeField] private PuzzleContainer puzzleContainer;
+	[SerializeField] private Transform pieceOutlineContainer;
+	[SerializeField] private PuzzlePiecePool pool;
+	[SerializeField] private LoadingScreen loadingScreen;
 
-	public PiecePrefab piecePrefab;
+	[SerializeField] private StartMenuController startMenu;
+	[SerializeField] private PlayFieldMover playFieldMover;
+	[SerializeField] private HelpOverlay helpOverlay;
+	[SerializeField] private GameObject victoryPanel;
 
-	public PuzzleContainer pContainer;
-	public PuzzlePiecePool pool;
+	[SerializeField] private MaskContainer maskContainer;
 
-	public GameObject loadingScreen;
-	public Image loadingBar;
-
-	public StartMenuController startMenu;
-	public PlayFieldMover playFieldMover;
-	public HelpOverlay helpOverlay;
-	public GameObject victoryPanel;
-
-	public MaskContainer maskContainer;
-
-	private Dictionary<IntVector2, PieceInfo> _pieceInfos = new Dictionary<IntVector2, PieceInfo>();
 	private uint _backButtonCallbackID;
 
+	#region Unity lifecycle
 	private void Start()
 	{
 		SetAppSettings();
+		SetupServices();
 
 #if !UNITY_EDITOR
 		TextureUtility.CleanupLegacyTextureData();
@@ -44,41 +42,27 @@ public class GameController : MonoBehaviour
 	{
 		if (Input.GetKeyDown(KeyCode.H))
 		{
-			pContainer.ToggleHighlightsInEditor();
+			puzzleContainer.ToggleHighlightsInEditor();
 		}
 	}
 #endif
 
-	private void SetAppSettings()
+	private void OnApplicationPause(bool pause)
 	{
-		Application.targetFrameRate = 30;
-		Screen.sleepTimeout = SleepTimeout.SystemSetting;
-		PuzzleService.Instance.OnPlayerHasWon += HandlePlayerWon;
+		if (pause)
+		{
+			ServiceLocator.Get<IGameStateService>().Save();
+		}
 	}
 
 	private void OnDestroy()
 	{
-		var ps = PuzzleService.Instance;
-		if (ps != null)
-		{
-			ps.OnPlayerHasWon -= HandlePlayerWon;
-		}
+		ServiceLocator.Shutdown();
 	}
 
-	private void HandlePlayerWon()
-	{
-		playFieldMover.ResetPlayFieldZoomAndPosition();
-		ReplacePiecesWithBackgroundOnVictory(playFieldMover.camResetDurationSeconds, imageRevealDuration);
-	}
+	#endregion
 
-	private void ReplacePiecesWithBackgroundOnVictory(float camResetDurationSeconds, float imgRevealDurationSeconds)
-	{
-		victoryPanel.gameObject.SetActive(true);
-		pContainer.ReplacePiecesWithBackgroundOnVictory(camResetDurationSeconds, 
-														imgRevealDurationSeconds);
-	}
-
-	public void HelpTapped()
+	public void OnHelpTapped()
 	{
 		helpOverlay.gameObject.SetActive(true);
 	}
@@ -90,10 +74,38 @@ public class GameController : MonoBehaviour
 		startMenu.ShowCloseAndResumeButton();
 	}
 
+	private void SetupServices()
+	{
+		ServiceLocator.Register<IBoardService>(new BoardService());
+		ServiceLocator.Register<IGameStateService>(new GameStateService());
+
+		ServiceLocator.Get<IBoardService>().OnPlayerHasWon += HandlePlayerWon;
+	}
+
+	private void SetAppSettings()
+	{
+		Application.targetFrameRate = TARGET_FRAMERATE;
+		Screen.sleepTimeout = SleepTimeout.SystemSetting;
+	}
+
+	private void HandlePlayerWon()
+	{
+		playFieldMover.ResetPlayFieldZoomAndPosition();
+		ReplacePiecesWithBackgroundOnVictory(playFieldMover.camResetDurationSeconds, IMG_REVEAL_DURATION_SECONDS);
+	}
+
+	private void ReplacePiecesWithBackgroundOnVictory(float camResetDurationSeconds, float imgRevealDurationSeconds)
+	{
+		victoryPanel.gameObject.SetActive(true);
+		puzzleContainer.ReplacePiecesWithBackgroundOnVictory(camResetDurationSeconds,
+															imgRevealDurationSeconds);
+	}
+
 	private void TryLoadSavedGame()
 	{
-		var savedTextureInfo = TextureUtility.TryGetSavedTextureInfo();
-		if (savedTextureInfo != null)
+		SlicedTextureInfo savedTextureInfo;
+
+		if (TextureUtility.TryGetSavedTextureInfo(out savedTextureInfo))
 		{
 			var textureToSlice = NativeGallery.LoadImageAtPath(savedTextureInfo.originalPath,
 															   markTextureNonReadable: false,
@@ -142,98 +154,96 @@ public class GameController : MonoBehaviour
 		startMenu.playButton.interactable = true;
 	}
 
-	private void SetLoadStatus(float rate)
-	{
-		loadingBar.fillAmount = rate;
-	}
-
-	private void ShowAndResetLoadingScreen()
-	{
-		startMenu.playButton.interactable = true;
-		startMenu.gameObject.SetActive(false);
-
-		loadingScreen.gameObject.SetActive(true);
-		loadingBar.fillAmount = 0f;
-	}
-
 	private IEnumerator DoSetupRoutine(Texture2D originalTexture, string originalTexturePath,
 									   SlicedTextureInfo savedTextureInfo = null)
 	{
-		victoryPanel.gameObject.SetActive(false);
-		ShowAndResetLoadingScreen();
 		BackButtonManager.Instance.Suspend();
-
-		playFieldMover.ResetPlayFieldZoomAndPosition(lerpOverTime: false);
-
-		_pieceInfos.Clear();
+		PrepareUIForSetup();
 
 		var originalSize = new Vector2(originalTexture.width, originalTexture.height);
+		var slicingInfo = savedTextureInfo == null ? ImgSlicer.GetSliceInfo(originalSize, startMenu.SelectedDifficulty)
+												   : new SlicingInfo(savedTextureInfo);
 
-		var sliceInfo = savedTextureInfo == null ? ImgSlicer.GetSliceInfo(originalSize, startMenu.SelectedDifficulty)
-												 : new SlicingInfo(savedTextureInfo);
-
-		originalTexture.wrapMode = TextureWrapMode.Clamp;
-		ImgSlicer.SetupConnections(sliceInfo, _pieceInfos);
-
-		PuzzleService.Instance.Reset();
-		pContainer.Setup(sliceInfo, originalTexture);
-		pool.Setup(sliceInfo);
-		playFieldMover.Reset();
+		InitPlayFieldAndContainers(slicingInfo, originalTexture);
 
 		Texture2D slicedTexture;
-		var couldLoadSavedGame = TextureUtility.TryLoadSavedTexture(originalSize, sliceInfo.rows, sliceInfo.columns,
+		var couldLoadSavedTexture = TextureUtility.TryLoadSavedTexture(originalSize, slicingInfo.rows, slicingInfo.columns,
 													 savedTextureInfo, originalTexturePath, out slicedTexture);
 
-		if (!couldLoadSavedGame)
+		if (!couldLoadSavedTexture)
 		{
-			yield return ImgSlicer.CreateAndSaveSlicedTextureRoutine(sliceInfo.rows, sliceInfo.columns,
-																	 originalTexture, originalSize, slicedTexture,
-																	 originalTexturePath,
-																	 maskContainer,
-																	 _pieceInfos,
-																	 SetLoadStatus);
+			var pieceConnections = ImgSlicer.SetupConnections(slicingInfo);
+			yield return ImgSlicer.CreateAndSaveSlicedTextureRoutine(slicingInfo, originalTexture, slicedTexture,
+																	 originalTexturePath, maskContainer, pieceConnections,
+																	 loadingScreen.SetLoadStatus);
 		}
 
 		slicedTexture.wrapMode = TextureWrapMode.Clamp;
 		slicedTexture.Apply(true, true);
 
-		SetupPrefabs(sliceInfo.rows, sliceInfo.columns, slicedTexture, couldLoadSavedGame);
+		SetupPrefabs(slicingInfo.rows, slicingInfo.columns, slicedTexture, couldLoadSavedTexture);
 
 		Resources.UnloadUnusedAssets();
-		pool.ScrollToTop();
-
 		DoStartGame();
+	}
+
+	private void InitPlayFieldAndContainers(SlicingInfo slicingInfo, Texture2D originalTexture)
+	{
+		ServiceLocator.InitAllServices();
+
+		puzzleContainer.Init(slicingInfo, originalTexture);
+		pool.Init(slicingInfo);
+		playFieldMover.Init();
 	}
 
 	private void DoStartGame()
 	{
 		BackButtonManager.Instance.Resume();
 		HandleBackButtonUntilFurtherNotice();
+		pool.ScrollToTop();
 		loadingScreen.gameObject.SetActive(false);
+	}
+
+	private void PrepareUIForSetup()
+	{
+		startMenu.playButton.interactable = true;
+		startMenu.gameObject.SetActive(false);
+
+		loadingScreen.gameObject.SetActive(true);
+		loadingScreen.SetLoadStatus(0f);
+
+		victoryPanel.gameObject.SetActive(false);
+
+		playFieldMover.ResetPlayFieldZoomAndPosition(lerpOverTime: false);
 	}
 
 	private void SetupPrefabs(int rows, int columns, Texture2D slicedTexture, bool tryLoadGameState)
 	{
-		PuzzleService.Instance.Setup(rows * columns, pContainer.topRightBounds.position,
-											pContainer.bottomLeftBounds.position);
+		var boardService = ServiceLocator.Get<IBoardService>();
+
+		boardService.Setup(rows * columns,
+					   pieceOutlineContainer,
+					   puzzleContainer.transform);
 
 		var pieceScaleFactor = 1f + (ImgSlicer.PADDING_RATIO * 2f);
-		PuzzleService.pieceScaleFactor = pieceScaleFactor;
 
-		GameState gameState = tryLoadGameState ? PuzzleService.Instance.TryLoadSavedGameState() : null;
+		BoardContext.Instance.Setup(pieceScaleFactor, puzzleContainer.topRightBounds.position, 
+									puzzleContainer.bottomLeftBounds.position);
+
+		var gameStateService = ServiceLocator.Get<IGameStateService>();
+		gameStateService.TryLoad(expectedPieceCount: rows * columns);
 
 		for (int col = 0; col < columns; ++col)
 		{
 			for (int row = 0; row < rows; ++row)
 			{
-				var pieceAnchor = pContainer.GetPieceAnchor(row, col);
+				var pieceAnchor = puzzleContainer.GetPieceAnchor(row, col);
 				var anchorInPool = pool.GetPieceAnchor(row, col, columns);
 
-				var isOnPlayField = gameState != null && gameState.IsOnPlayField(col, row);
-
+				var isOnPlayField = gameStateService.IsPieceOnPlayField(col, row);
 				var parent = isOnPlayField ? pieceAnchor : anchorInPool;
 
-				var newPrefab = Instantiate<PiecePrefab>(piecePrefab, parent, false);
+				var newPrefab = Instantiate<PiecePrefab>(piecePrefabPrototype, parent, false);
 
 				var uv0x = (float)col / (float)columns;
 				var uv0y = (float)row / (float)rows;
@@ -247,13 +257,15 @@ public class GameController : MonoBehaviour
 				newPrefab.transform.localPosition = Vector3.zero;
 
 				newPrefab.transform.localScale = new Vector3(pieceScaleFactor, pieceScaleFactor);
+
 				newPrefab.pieceAnchor = pieceAnchor;
 				newPrefab.anchorInPool = anchorInPool;
+				newPrefab.pieceOutlineContainer = pieceOutlineContainer;
 
 				if (isOnPlayField)
 				{
-					PuzzleService.Instance.MarkPieceOnPlayingField(newPrefab);
-					newPrefab.transform.position = gameState.GetWorldPosition(col, row);
+					boardService.MarkPieceOnPlayField(newPrefab);
+					newPrefab.transform.position = gameStateService.GetWorldPosition(col, row);
 					anchorInPool.gameObject.SetActive(false);
 					newPrefab.TryMoveBackgroundToBackgroundDisplay();
 				}
@@ -262,13 +274,13 @@ public class GameController : MonoBehaviour
 
 		if (tryLoadGameState)
 		{
-			if (gameState.HasWon)
+			if (gameStateService.HasWon)
 			{
 				ReplacePiecesWithBackgroundOnVictory(0f, 0f);
 			}
 			else
 			{
-				PuzzleService.Instance.ConnectLoadedPieces();
+				boardService.SnapAndConnectLoadedPieces();
 			}
 		}
 	}

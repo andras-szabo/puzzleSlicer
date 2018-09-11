@@ -3,37 +3,20 @@ using UnityEngine.EventSystems;
 
 public class PlayClickOnTap : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
-	public AudioVolumes volumeConfig;
-	public AudioSFX sfxToPlay;
+	public bool isUI;
 
-	private float _startVolume;
-	private float _endVolume;
-
-	private void Start()
+	private void PlaySFX(AudioSFX sfx)
 	{
-		_startVolume = volumeConfig.StartVolume(sfxToPlay);
-		_endVolume = volumeConfig.EndVolume(sfxToPlay);
-	}
-
-	private void PlayClickSFX(float volumePercent)
-	{
-		AudioManager.Instance.Play(sfxToPlay, volumePercent);
+		AudioManager.Instance.Play(sfx);
 	}
 
 	public void OnPointerDown(PointerEventData eventData)
 	{
-		PlayClickSFX(_startVolume);
+		PlaySFX(isUI ? AudioSFX.ButtonTapStart : AudioSFX.PieceTapStart);
 	}
 
 	public void OnPointerUp(PointerEventData eventData)
 	{
-		PlayClickSFX(_endVolume);
+		PlaySFX(isUI ? AudioSFX.ButtonTapEnd : AudioSFX.PieceTapEnd);
 	}
-}
-
-public enum AudioSFX
-{
-	None,
-	ButtonClick,
-	PieceClick
 }

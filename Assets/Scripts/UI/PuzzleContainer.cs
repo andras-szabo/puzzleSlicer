@@ -43,7 +43,7 @@ public class PuzzleContainer : MonoBehaviour
 	public void ToggleBackground()
 	{
 		var currentState = helperBackgroundImg.gameObject.activeSelf;
-		if (!PuzzleService.Instance.IsGameWon)
+		if (!ServiceLocator.Get<IGameStateService>().HasWon)
 		{
 			helperBackgroundImg.gameObject.SetActive(!currentState);
 		}
@@ -54,7 +54,7 @@ public class PuzzleContainer : MonoBehaviour
 		helperBackgroundImg.gameObject.SetActive(state);
 	}
 
-	public void Setup(SlicingInfo sliceInfo, Texture2D imageToSlice)
+	public void Init(SlicingInfo sliceInfo, Texture2D imageToSlice)
 	{
 		Cleanup();
 
@@ -98,8 +98,7 @@ public class PuzzleContainer : MonoBehaviour
 
 		var anchorDifference = _pieceAnchors[new IntVector2(1, 1)].transform.position - _pieceAnchors[new IntVector2(0, 0)].transform.position;
 
-		PuzzleService.pieceWidth = anchorDifference.x;
-		PuzzleService.pieceHeight = anchorDifference.y;
+		BoardContext.Instance.SetPieceDimensions(new Vector2(anchorDifference.x, anchorDifference.y));
 	}
 
 	private Coroutine _victoryRoutine;
