@@ -150,6 +150,7 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 			if (delta.x < -PIECE_MOVE_TO_BOARD_HORIZONTAL_THRESHOLD_WORLD_UNITS)
 			{
 				MoveToPlayingField();
+				PuzzlePiecePool.Instance.scrollRect.OnEndDrag(eventData);
 			}
 			else
 			{
