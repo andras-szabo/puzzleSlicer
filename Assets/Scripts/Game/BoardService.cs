@@ -92,7 +92,10 @@ public class BoardService : IBoardService
 
 		_gameStateService.UpdatePositionAndSaveConnections(piece, this);
 		
-		if (_gameStateService.HasWon) { OnPlayerHasWon(); }
+		if (_gameStateService.HasWon) 
+		{
+			OnPlayerHasWon(); 
+		}
 	}
 
 	public Vector3 GetWorldPositionForPiece(IntVector2 boardPosition)

@@ -100,7 +100,7 @@ public class GameStateService : IGameStateService
 	{
 		_gameState.rootsByBoardPosition.Clear();
 		_gameState.rootPositionsForEachPiece.Clear();
-		_gameState._totalPieceCount = -1;
+		_gameState.totalPieceCount = -1;
 		HasWon = false;
 	}
 
@@ -109,7 +109,7 @@ public class GameStateService : IGameStateService
 		var serializedState = new SerializedGameState
 		{
 			roots = new List<RootInfo>(_gameState.rootsByBoardPosition.Values),
-			totalPieceCount = _gameState._totalPieceCount,
+			totalPieceCount = _gameState.totalPieceCount,
 			hasWon = HasWon
 		};
 
@@ -126,7 +126,7 @@ public class GameStateService : IGameStateService
 
 	public void Setup(int pieceCount)
 	{
-		_gameState._totalPieceCount = pieceCount;
+		_gameState.totalPieceCount = pieceCount;
 		HasWon = false;
 	}
 
@@ -209,14 +209,14 @@ public class GameStateService : IGameStateService
 			}
 		}
 
-		if (serializedGameState.totalPieceCount == 0)                       // Dealing with legacy gamestate without total piece count
+		if (serializedGameState.totalPieceCount <= 0)                       // Dealing with legacy gamestate without total piece count
 		{
-			_gameState._totalPieceCount = expectedTotalPieceCount;
+			_gameState.totalPieceCount = expectedTotalPieceCount;
 			CheckIfWon();
 		}
 		else
 		{
-			_gameState._totalPieceCount = serializedGameState.totalPieceCount;
+			_gameState.totalPieceCount = serializedGameState.totalPieceCount;
 			HasWon = serializedGameState.hasWon;
 		}
 	}
@@ -224,6 +224,6 @@ public class GameStateService : IGameStateService
 	private void CheckIfWon()
 	{
 		HasWon = _gameState.rootsByBoardPosition.Count == 1
-			  && _gameState.rootPositionsForEachPiece.Count == _gameState._totalPieceCount;
+			  && _gameState.rootPositionsForEachPiece.Count == _gameState.totalPieceCount;
 	}
 }
