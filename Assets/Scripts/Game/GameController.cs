@@ -75,6 +75,7 @@ public class GameController : MonoBehaviour
 
 	public void OnSettingsMenuTapped()
 	{
+		settingsMenu.Setup(puzzleContainer.helperBackgroundImg.color.a, Color.white);
 		settingsMenu.gameObject.SetActive(true);
 	}
 
@@ -83,6 +84,11 @@ public class GameController : MonoBehaviour
 		BackButtonManager.Instance.Pop(_backButtonCallbackID);
 		startMenu.gameObject.SetActive(true);
 		startMenu.ShowCloseAndResumeButton();
+	}
+
+	public void ChangeHelperBackgroundIntensity(float value)
+	{
+		puzzleContainer.helperBackgroundImg.color = new Color(1f, 1f, 1f, value);
 	}
 
 	private void SetupServices()
