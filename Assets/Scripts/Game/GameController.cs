@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
@@ -22,9 +23,14 @@ public class GameController : MonoBehaviour
 	[SerializeField] private SettingsMenu settingsMenu;
 	[SerializeField] private GameObject victoryPanel;
 
+	// [SerializeField] private RawImage playFieldBgImage;
+
 	[SerializeField] private MaskContainer maskContainer;
 
 	private uint _backButtonCallbackID;
+
+	private Camera _mainCam;
+	private Camera MainCam { get { return _mainCam ?? (_mainCam = Camera.main); } }
 
 	#region Unity lifecycle
 	private void Start()
@@ -75,7 +81,7 @@ public class GameController : MonoBehaviour
 
 	public void OnSettingsMenuTapped()
 	{
-		settingsMenu.Setup(puzzleContainer.helperBackgroundImg.color.a, Color.white);
+		settingsMenu.Setup(puzzleContainer.helperBackgroundImg.color.a, MainCam.backgroundColor);
 		settingsMenu.gameObject.SetActive(true);
 	}
 
@@ -89,6 +95,11 @@ public class GameController : MonoBehaviour
 	public void ChangeHelperBackgroundIntensity(float value)
 	{
 		puzzleContainer.helperBackgroundImg.color = new Color(1f, 1f, 1f, value);
+	}
+
+	public void ChangePlayfieldBgColor(Color color)
+	{
+		MainCam.backgroundColor = color;
 	}
 
 	private void SetupServices()

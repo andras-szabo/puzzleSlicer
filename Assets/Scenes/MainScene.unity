@@ -337,7 +337,7 @@ GameObject:
   - component: {fileID: 64586744}
   - component: {fileID: 64586745}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: Alpha
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -409,7 +409,18 @@ MonoBehaviour:
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1499168212}
+        m_MethodName: OnColorChange
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Slider+SliderEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!1 &71627185
@@ -1053,7 +1064,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.56144416, g: 0.53333336, b: 1, a: 0.105882354}
+  m_Color: {r: 0, g: 0, b: 0, a: 0}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -1402,9 +1413,9 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 1066870396}
   - {fileID: 1092210915}
   - {fileID: 959949719}
+  - {fileID: 1066870396}
   - {fileID: 64586744}
   m_Father: {fileID: 1734001429}
   m_RootOrder: 1
@@ -2147,7 +2158,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.7738519, g: 0.81777316, b: 0.8867924, a: 0}
+  m_BackGroundColor: {r: 0.7738519, g: 0.81777316, b: 0.8867924, a: 0.49411765}
   m_projectionMatrixMode: 1
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
@@ -3860,7 +3871,7 @@ GameObject:
   - component: {fileID: 959949719}
   - component: {fileID: 959949720}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: Green
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3880,11 +3891,11 @@ RectTransform:
   - {fileID: 1848957014}
   - {fileID: 1843901237}
   m_Father: {fileID: 268989414}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 113.22601, y: -203.125}
+  m_AnchoredPosition: {x: 113.22601, y: -121.875}
   m_SizeDelta: {x: 226.45203, y: 81.25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &959949720
@@ -3932,7 +3943,18 @@ MonoBehaviour:
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1499168212}
+        m_MethodName: OnColorChange
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Slider+SliderEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!1 &988477989
@@ -4379,7 +4401,7 @@ GameObject:
   - component: {fileID: 1066870396}
   - component: {fileID: 1066870397}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: Blue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4399,11 +4421,11 @@ RectTransform:
   - {fileID: 957733896}
   - {fileID: 1991483777}
   m_Father: {fileID: 268989414}
-  m_RootOrder: 0
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 113.22601, y: -40.625}
+  m_AnchoredPosition: {x: 113.22601, y: -203.125}
   m_SizeDelta: {x: 226.45203, y: 81.25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1066870397
@@ -4451,7 +4473,18 @@ MonoBehaviour:
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1499168212}
+        m_MethodName: OnColorChange
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Slider+SliderEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!1 &1082980900
@@ -4539,7 +4572,7 @@ GameObject:
   - component: {fileID: 1092210915}
   - component: {fileID: 1092210916}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: Red
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4559,11 +4592,11 @@ RectTransform:
   - {fileID: 1923057273}
   - {fileID: 105851517}
   m_Father: {fileID: 268989414}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 113.22601, y: -121.875}
+  m_AnchoredPosition: {x: 113.22601, y: -40.625}
   m_SizeDelta: {x: 226.45203, y: 81.25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1092210916
@@ -4611,7 +4644,18 @@ MonoBehaviour:
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1499168212}
+        m_MethodName: OnColorChange
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Slider+SliderEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!1 &1103120409
@@ -4900,7 +4944,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1110697777}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1499168212}
+        m_MethodName: OnDefaultColorPicked
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &1110697777
@@ -4915,7 +4970,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.65882355, g: 0.2509804, b: 0.8745099, a: 1}
+  m_Color: {r: 0.56144416, g: 0.53333336, b: 1, a: 0.62352943}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -6681,6 +6736,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1499168210}
   - component: {fileID: 1499168211}
+  - component: {fileID: 1499168212}
   m_Layer: 5
   m_Name: ContainerColorPicker
   m_TagString: Untagged
@@ -6730,6 +6786,25 @@ MonoBehaviour:
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 1
   m_ChildControlHeight: 1
+--- !u!114 &1499168212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1499168209}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e47b9bca7fa976647be56898bb75af1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showAlpha: 0
+  previewImage: {fileID: 1182867483}
+  redSlider: {fileID: 1092210916}
+  greenSlider: {fileID: 959949720}
+  blueSlider: {fileID: 1066870397}
+  alphaSlider: {fileID: 64586745}
+  alphaLabel: {fileID: 1330270562}
+  defaultColor: {r: 0.7738519, g: 0.81777316, b: 0.8867924, a: 0.49411765}
 --- !u!1 &1503005743
 GameObject:
   m_ObjectHideFlags: 0
@@ -9680,6 +9755,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bgHelperIntensitySlider: {fileID: 1487647672}
   gameController: {fileID: 1336305816}
+  colorPicker: {fileID: 1499168212}
 --- !u!114 &1881719118
 MonoBehaviour:
   m_ObjectHideFlags: 0

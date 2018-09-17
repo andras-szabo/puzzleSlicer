@@ -3,8 +3,9 @@ using UnityEngine.UI;
 
 public class SettingsMenu : MonoBehaviour
 {
-	[SerializeField] Slider bgHelperIntensitySlider;
-	[SerializeField] GameController gameController;
+	[SerializeField] private Slider bgHelperIntensitySlider;
+	[SerializeField] private GameController gameController;
+	[SerializeField] private ColorPicker colorPicker;
 
 	private uint _backButtonCallbackID;
 
@@ -21,6 +22,12 @@ public class SettingsMenu : MonoBehaviour
 	public void Setup(float bgHelperIntensity, Color bgColor)
 	{
 		SetupBgHelperIntensitySlider(bgHelperIntensity);
+		colorPicker.Setup(bgColor, HandleColorPicked);
+	}
+
+	private void HandleColorPicked(Color color)
+	{
+		gameController.ChangePlayfieldBgColor(color);
 	}
 
 	public void SetupBgHelperIntensitySlider(float intensity)
