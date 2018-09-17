@@ -19,6 +19,7 @@ public class GameController : MonoBehaviour
 	[SerializeField] private StartMenuController startMenu;
 	[SerializeField] private PlayFieldMover playFieldMover;
 	[SerializeField] private HelpOverlay helpOverlay;
+	[SerializeField] private SettingsMenu settingsMenu;
 	[SerializeField] private GameObject victoryPanel;
 
 	[SerializeField] private MaskContainer maskContainer;
@@ -70,6 +71,11 @@ public class GameController : MonoBehaviour
 	public void OnBringPiecesToFrontTapped()
 	{
 		ServiceLocator.Get<IBoardService>().BringFreeStandingPiecesToTheFront();
+	}
+
+	public void OnSettingsMenuTapped()
+	{
+		settingsMenu.gameObject.SetActive(true);
 	}
 
 	public void OnExitTapped()

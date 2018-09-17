@@ -53,6 +53,12 @@ public class AudioManager : MonoSingleton<AudioManager>
 
 	private Dictionary<string, AudioClip> _clipsByName = new Dictionary<string, AudioClip>();
 
+	public bool ToggleSFX()
+	{
+		var current = SFX;
+		return (SFX = !current);
+	}
+
 	public void Play(string clipName, float volumePercent = 100f)
 	{
 		if (SFX)

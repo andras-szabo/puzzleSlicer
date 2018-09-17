@@ -7,7 +7,6 @@ public class StartMenuController : MonoBehaviour
 	public Button resumeButton;
 	public DifficultySelector diffSelector;
 	public Button playButton;
-	public Text sfxLabel;
 	public Text versionLabel;
 
 	public QuitConfirmPopup quitConfirmPopup;
@@ -16,12 +15,8 @@ public class StartMenuController : MonoBehaviour
 
 	private uint _backButtonCallbackID;
 
-	private bool _sfxState;
-
 	private void Start()
 	{
-		_sfxState = AudioManager.Instance.SFX;
-		UpdateSFXState();
 		UpdateVersionLabel();
 	}
 
@@ -47,18 +42,6 @@ public class StartMenuController : MonoBehaviour
 	private void ConfirmQuit()
 	{
 		quitConfirmPopup.gameObject.SetActive(true);	
-	}
-
-	private void UpdateSFXState()
-	{
-		sfxLabel.text = string.Format("Sound {0}", _sfxState ? "ON" : "OFF");
-		AudioManager.Instance.SFX = _sfxState;
-	}
-
-	public void OnSFXButtonTapped()
-	{
-		_sfxState = !_sfxState;
-		UpdateSFXState();
 	}
 
 	public void OnPlayTapped()

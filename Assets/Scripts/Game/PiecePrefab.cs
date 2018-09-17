@@ -119,8 +119,6 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 
 		if (_isOnPlayingField)
 		{
-			var newPosition = CachedTransform.position + delta;
-
 			foreach (var piece in connectedPieces)
 			{
 				piece.MoveBy(delta);
