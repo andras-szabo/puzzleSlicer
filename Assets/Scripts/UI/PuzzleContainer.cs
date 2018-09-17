@@ -54,7 +54,7 @@ public class PuzzleContainer : MonoBehaviour
 		helperBackgroundImg.gameObject.SetActive(state);
 	}
 
-	public void Init(SlicingInfo sliceInfo, Texture2D imageToSlice)
+	public void Init(SlicingInfo sliceInfo, Texture2D imageToSlice, float bgIntensity)
 	{
 		Cleanup();
 
@@ -62,7 +62,7 @@ public class PuzzleContainer : MonoBehaviour
 		var imgHeight = imageToSlice.height;
 
 		helperBackgroundImg.texture = imageToSlice;
-		helperBackgroundImg.color = new Color(1f, 1f, 1f, 32f / 255f);
+		helperBackgroundImg.color = new Color(1f, 1f, 1f, bgIntensity);
 		
 		var relativeWidth = 1f / (float)sliceInfo.columns;
 		var relativeHeight = 1f / (float)sliceInfo.rows;

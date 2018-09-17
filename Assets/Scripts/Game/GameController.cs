@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
@@ -23,11 +22,14 @@ public class GameController : MonoBehaviour
 	[SerializeField] private SettingsMenu settingsMenu;
 	[SerializeField] private GameObject victoryPanel;
 
-	// [SerializeField] private RawImage playFieldBgImage;
-
 	[SerializeField] private MaskContainer maskContainer;
 
 	private uint _backButtonCallbackID;
+	private float _bgIntensity;
+
+	private float _bgR;
+	private float _bgG;
+	private float _bgB;
 
 	private Camera _mainCam;
 	private Camera MainCam { get { return _mainCam ?? (_mainCam = Camera.main); } }
@@ -37,6 +39,7 @@ public class GameController : MonoBehaviour
 	{
 		SetAppSettings();
 		SetupServices();
+		LoadSavedSettings();
 
 #if !UNITY_EDITOR
 		TextureUtility.CleanupLegacyTextureData();
@@ -54,10 +57,25 @@ public class GameController : MonoBehaviour
 	}
 #endif
 
+	private void LoadSavedSettings()
+	{
+		_bgIntensity = PlayerPrefs.GetFloat(SettingsMenu.PP_KEY_BG_INTENSITY, 32f / 255f);
+
+		_bgR = PlayerPrefs.GetFloat(SettingsMenu.PP_KEY_BG_R, -1f);
+		_bgG = PlayerPrefs.GetFloat(SettingsMenu.PP_KEY_BG_G, -1f);
+		_bgB = PlayerPrefs.GetFloat(SettingsMenu.PP_KEY_BG_B, -1f);
+
+		if (_bgR >= 0f)
+		{
+			ChangePlayfieldBgColor(new Color(_bgR, _bgG, _bgB, MainCam.backgroundColor.a));
+		}
+	}
+
 	private void OnApplicationPause(bool pause)
 	{
 		if (pause)
 		{
+			PlayerPrefs.Save();
 			ServiceLocator.Get<IGameStateService>().Save();
 		}
 	}
@@ -223,7 +241,7 @@ public class GameController : MonoBehaviour
 	{
 		ServiceLocator.InitAllServices();
 
-		puzzleContainer.Init(slicingInfo, originalTexture);
+		puzzleContainer.Init(slicingInfo, originalTexture, _bgIntensity);
 		pool.Init(slicingInfo);
 		playFieldMover.Init();
 	}

@@ -15,6 +15,8 @@ public class ColorPicker : MonoBehaviour
 
 	[SerializeField] private Color defaultColor;
 
+	public Color CurrentColor { get; private set; }
+
 	private Action<Color> _callback;
 
 	private void OnEnable()
@@ -36,6 +38,8 @@ public class ColorPicker : MonoBehaviour
 
 	private void SetSlidersTo(Color color)
 	{
+		CurrentColor = color;
+
 		redSlider.normalizedValue = color.r;
 		greenSlider.normalizedValue = color.g;
 		blueSlider.normalizedValue = color.b;
@@ -44,6 +48,8 @@ public class ColorPicker : MonoBehaviour
 
 	private void HandleNewColorPicked(Color pickedColor)
 	{
+		CurrentColor = pickedColor;
+
 		previewImage.color = pickedColor;
 		if (_callback != null)
 		{

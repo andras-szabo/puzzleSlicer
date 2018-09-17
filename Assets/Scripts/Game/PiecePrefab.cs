@@ -80,8 +80,8 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 			for (int i = 0; i < connectedPieces.Count && surroundingPieceCount < 4; ++i)
 			{
 				var distance = connectedPieces[i].BoardPosition - BoardPosition;
-				var crudeDistanceLength = distance.x + distance.y;
-				if (crudeDistanceLength == 1 || crudeDistanceLength == -1)
+				var crudeDistanceLength = Mathf.Abs(distance.x) + Mathf.Abs(distance.y);
+				if (crudeDistanceLength == 1)
 				{
 					surroundingPieceCount++;
 				}
