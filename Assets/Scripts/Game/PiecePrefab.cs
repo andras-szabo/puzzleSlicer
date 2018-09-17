@@ -10,7 +10,7 @@ public class PiecePrefab : MonoWithCachedTransform, IDragHandler, IBeginDragHand
 	public const float UPSCALE_OF_SELECTED_PIECE = 1.02f;
 	public const float DOUBLE_TAP_BREAK_INTERVAL = 0.2f;
 	public const float UPSCALE_BACKGROUND = 1f;
-	public const float PIECE_MOVE_TO_BOARD_HORIZONTAL_THRESHOLD_WORLD_UNITS = 10f;
+	public const float PIECE_MOVE_TO_BOARD_HORIZONTAL_THRESHOLD_WORLD_UNITS = 15f;
 
 	public RawImage pieceRawImage;
 	public RawImage pieceBackgroundImage;
