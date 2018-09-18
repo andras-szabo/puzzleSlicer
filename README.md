@@ -16,6 +16,10 @@ UI shader, but without clipping (for performance reasons). And another simple fl
 shader is used to draw the outline of matching connecting pieces.
 
 Changelog:
+0.10:
+- fix a bug with sometimes missing piece outline
+- adjust drag-and-drop sensitivity
+- setting menu; change original image intensity and bacgkround colour
 
 0.9:
 - drag-and-drop from the queue to the play field
